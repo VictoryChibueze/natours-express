@@ -1,9 +1,20 @@
 const express = require('express');
 const app = express();
 const fs = require('fs');
+const morgan = require('morgan');
 const Port = 3000;
 
+app.use(morgan('dev'));
 app.use(express.json());
+app.use((req, res, next) => {
+  console.log('Hello from the middleware');
+  next();
+});
+
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
+});
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
@@ -12,6 +23,7 @@ const getAlltours = (req, res) => {
   res.status(200).json({
     status: 'sucess',
     result: tours.length,
+    requestedAt: req.requestTime,
     data: {
       tours: tours,
     },
